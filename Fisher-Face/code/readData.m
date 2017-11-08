@@ -13,9 +13,10 @@ end
 % test image data set.
 function [trainImgCell,testImgCell]=readDB(dirpath,dimension,numOfPerson,trainSize,testSize)
     subSample=1; % sub sampling is true
+    sampleBy=1/2;
     row=dimension(1);col=dimension(2);
     if(subSample)
-       row=floor(row/2);col=floor(col/2);
+       row=floor(row*sampleBy);col=floor(col*sampleBy);
     end
     trainImgMatrix=zeros(row*col,numOfPerson*trainSize);
     trainImgLabel=zeros(numOfPerson*trainSize,1);
@@ -48,7 +49,7 @@ function [trainImgCell,testImgCell]=readDB(dirpath,dimension,numOfPerson,trainSi
                     %fprintf('%s:\n',fullFilePath);
                     img = imread(fullFilePath);                    
                     if(subSample) % subsample
-                        img=imresize(img,0.5);
+                        img=imresize(img,sampleBy);
                     end
                     [irow,icol] = size(img);
                     vector = reshape(img,irow*icol,1);

@@ -12,4 +12,5 @@ function [allImageMean,efaceNormalized,allImageDeviation]=eigenFace(imgMatrix)
     efaceSq=eigFace.^2;
     efaceDis=sum(efaceSq).^0.5;
     efaceNormalized= bsxfun(@times, eigFace, 1./efaceDis);
+    %efaceNormalized=eigFace;
 end
