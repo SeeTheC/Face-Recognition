@@ -1,17 +1,13 @@
 
-
-%% Face recognition using Eigen Faces
-% We have used PCA algorithm to find eigen faces and for optimization we
-% have use L matrix where L = A'A
-%% Initialization Att Face Datase
-% Reading the att_faces and yale database
+%% Initialization  Face Datase
 % Read data will return train and  test cell. Each cell contains data and
 % its associated label.
 tic
+downSample=0.5;
 attDirpath='../../dataset/att_faces';
 yaleDirpath='../../dataset/CroppedYale';
-%[attrTrainImgCell,attrTestImgCell]=readData(attDirpath,'att_faces');
-[yaleTrainImgCell,yaleTestImgCell]=readData(yaleDirpath,'yale');
+%[attrTrainImgCell,attrTestImgCell]=readData(attDirpath,'att_faces',downSample);
+[yaleTrainImgCell,yaleTestImgCell,imgHeight,imgWidth]=readData(yaleDirpath,'yale',downSample);
 
 %yaleTrainImgCell{1}=yaleTrainImgCell{1}./255;
 %yaleTestImgCell{1}=yaleTestImgCell{1}./255;
@@ -22,7 +18,8 @@ fprintf('**Reading of images Done.\n');
 %% 1. Finding the EignFace : Yale Dateset
 % Size of train data set size is 40*38 images and test data size is
 % 20*38 images.
-% Here we are finding eigen faces of Yale Dataset. EigenFace is calculated using SVD. It returns following : 
+% Here we are finding eigen faces of Yale Dataset. EigenFace is calculated 
+% using SVD. It returns following : 
 % 
 % * mean vector
 % * normalized eigen faces
@@ -33,13 +30,13 @@ tic
 trainImgCell=yaleTrainImgCell;
 [globalMean,Wpca,meanDeviatedImg]=eigenFaceUsingSVD(trainImgCell{1});
 %[mean,eface,meanDeviatedImg]=eigenFace(trainImgCell{1});
+totalTrainSamples=size(trainImgCell{1},2);noOfClass=max(trainImgCell{2});
 toc
 fprintf('**Finding Wpca.Done.\n');
 %% 2. Projecting Samples on lower dimensional space
 tic
 
 trainImgCell=yaleTrainImgCell;testImgCell=yaleTestImgCell;
-totalTrainSamples=size(trainImgCell{1},2);noOfClass=max(trainImgCell{2});
 Wpca=Wpca(:,1:totalTrainSamples-noOfClass);
 
 %Projecting Train Samples
@@ -54,9 +51,9 @@ toc
 fprintf('**Projecting sample to new dimensional space.Done.\n');
 %% 3. Fisher LDA
 tic
-trainImgCell=projectedTrainedImgCell;
+%%trainImgCell=projectedTrainedImgCell;
+Wpca=Wpca(:,1:totalTrainSamples-noOfClass);
 [Wopt,classSpecificMean]=FisherFace(trainImgCell,yaleTrainImgCell,Wpca);
-
 
 toc
 fprintf('**Finding Fisher Faces.Done.\n');
@@ -75,10 +72,9 @@ for i=1:16
     colorbar;
 end
 toc;
-%% 4. Find Wopt and Model Train Samples
+%% 4. Find Model Train Samples
 
 tic
-
 
 trainImgCell=yaleTrainImgCell;
 testImgCell=yaleTestImgCell;

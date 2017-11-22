@@ -6,8 +6,8 @@ function [Wopt,classSpecificMean] = FisherFace(trainImgCell,yaleTrainImgCell,Wpc
     %imgMatrix=trainImgCell{1};
     %imgLabel=trainImgCell{2};
     
-    %imgMatrix=yaleTrainImgCell{1};
-    %imgLabel=yaleTrainImgCell{2};
+    imgMatrix=yaleTrainImgCell{1};
+    imgLabel=yaleTrainImgCell{2};
     
     
     [vectorSize noOfImages]=size(imgMatrix);

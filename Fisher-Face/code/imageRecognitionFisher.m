@@ -29,9 +29,7 @@ function successRate = recognise(V,classSpecificMean,devTrainCell,devTestCell)
     trainLabel=devTrainCell{2};
     testLabel=devTestCell{2};  
     correctRecognition=0;
-    
-      
-    
+              
     for i=1:n
         bCoff_i=bEigenCoff(:,i);
         % j= || aj-b||2

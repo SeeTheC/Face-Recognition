@@ -1,22 +1,20 @@
-function [trainImgMatrix,testImgMatrix] = readData(dirpath,dbType)
+function [trainImgMatrix,testImgMatrix,row,col] = readData(dirpath,dbType,downSample)
     if strcmp(dbType,'att_faces')
         dim=[112,92];
-        [trainImgMatrix,testImgMatrix]=readDB(dirpath,dim,32,6,4);
+        [trainImgMatrix,testImgMatrix,row,col]=readDB(dirpath,dim,32,6,4,downSample);
     end
     if strcmp(dbType,'yale')
         dim=[192,168];
-        [trainImgMatrix,testImgMatrix]=readDB(dirpath,dim,38,40,20);
+        [trainImgMatrix,testImgMatrix,row,col]=readDB(dirpath,dim,38,40,20,downSample);
     end
 end
 
 % Reads the images from the Database and returns the trainImage dataset and
 % test image data set.
-function [trainImgCell,testImgCell]=readDB(dirpath,dimension,numOfPerson,trainSize,testSize)
-    subSample=1; % sub sampling is true
-    sampleBy=1/2;
+function [trainImgCell,testImgCell,row,col]=readDB(dirpath,dimension,numOfPerson,trainSize,testSize,downSample)    
     row=dimension(1);col=dimension(2);
-    if(subSample)
-       row=floor(row*sampleBy);col=floor(col*sampleBy);
+    if(downSample<1)
+       row=floor(row*downSample);col=floor(col*downSample);
     end
     trainImgMatrix=zeros(row*col,numOfPerson*trainSize);
     trainImgLabel=zeros(numOfPerson*trainSize,1);
@@ -48,8 +46,8 @@ function [trainImgCell,testImgCell]=readDB(dirpath,dimension,numOfPerson,trainSi
                     fullFilePath=strcat(imgDirPerPerson,'/',fileName);
                     %fprintf('%s:\n',fullFilePath);
                     img = imread(fullFilePath);                    
-                    if(subSample) % subsample
-                        img=imresize(img,sampleBy);
+                    if(downSample<1) % subsample
+                        img=imresize(img,downSample);
                     end
                     [irow,icol] = size(img);
                     vector = reshape(img,irow*icol,1);
