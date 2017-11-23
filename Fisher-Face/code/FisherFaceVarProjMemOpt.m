@@ -1,6 +1,6 @@
 % Fisher Faces
 % In this, simplification method is projecting Sw and Sb on Wpca. 
-function [Wopt,classSpecificMean] = FisherFaceVarProjection(trainImgCell,Wpca)
+function [Wopt,normWopt,classSpecificMean] = FisherFaceVarProjMemOpt1(trainImgCell,Wpca)
     % Initialization
     % Assuming the train set is sorted by the class label
     imgMatrix=trainImgCell{1};
@@ -29,30 +29,39 @@ function [Wopt,classSpecificMean] = FisherFaceVarProjection(trainImgCell,Wpca)
     meanDedicatedXi=zeros(vectorSize,noOfImages);    
     for i=1:noOfImages         
         meanDedicatedXi(:,i)=imgMatrix(:,i)-classSpecificMean(:,imgLabel(i));
-        %%Sw= Sw + (diff*diff'));
+        %Sw= Sw + (diff*diff'));
     end
-    Sw=meanDedicatedXi*meanDedicatedXi';
-    
+   
     % Finding between-class scatter (Sb) i.e 
     % Sb = sigma{k=1:c} Nk * (mu_k-mu)*(mu_k-mu)T
-    Sb=zeros(vectorSize,vectorSize);
+    bclassDiff=zeros(vectorSize,noOfClass);
     for c=1:noOfClass 
         ni=datapointPerClass(c);
         diff=classSpecificMean(:,c)-globalmean;
-        Sb= Sb + (ni * (diff*diff'));
+        %Sb= Sb + (ni * (diff*diff'));
+        bclassDiff(:,c)= (sqrt(ni) * (diff));
     end
     
     % Taking only N-C Vectors of Wpca Projection
     Wpca=Wpca(:,1:totalTrainSamples-noOfClass);
     %Projecting Sb and Sw on Wpca domain
-    WtSbW=Wpca'*Sb*Wpca;
+    WtSbW=(Wpca'*bclassDiff)*(bclassDiff'*Wpca);    
     WtSwW=(Wpca'*meanDedicatedXi)*(meanDedicatedXi'*Wpca);
     
     [Wfld,D]=eig(WtSbW,WtSwW);
+    
     [D,idx] = sort(diag(D),'descend');
-    Wfld = Wfld(:,idx);
+    Wfld = Wfld(:,idx);    
     
     %Taking Top C-1 Eign Vectors because after all eigen values are zero
     Wfld=Wfld(:,1:noOfClass-1); 
     Wopt=Wpca*Wfld;
+    normWopt=normalize(Wopt);    
+    
+end
+
+function wNorm=normalize(w)
+    wSq=w.^2;
+    wDis=sum(wSq).^0.5;
+    wNorm= bsxfun(@times, w, 1./wDis);
 end

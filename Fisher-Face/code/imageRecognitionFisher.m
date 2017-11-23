@@ -1,23 +1,16 @@
-function recognitionRate = imageRecognitionFisher(fisherFace,globalMean,classSpecificMean,devTrainCell,testCell)    
+function recognitionRate = imageRecognitionFisher(fisherFace,globalMean,devTrainCell,testCell)    
     %Tries to recognise the test image with K eigen Values    
-    devTestSet=bsxfun(@minus, testCell{1}, globalMean);
-    successRate=recognise(fisherFace,classSpecificMean,devTrainCell,{devTestSet,testCell{2}});
-    fprintf('Recognition-Rate:%f \n',successRate);   
+    %devTestSet=bsxfun(@minus, testCell{1}, globalMean);
+    devTestSet=testCell{1};
+    successRate=recognise(fisherFace,devTrainCell,{devTestSet,testCell{2}});
+    fprintf('**Recognition-Rate:%f \n',successRate);   
     recognitionRate=successRate;
 end
 
 
-function successRate = recognise(V,classSpecificMean,devTrainCell,devTestCell)
+function successRate = recognise(V,devTrainCell,devTestCell)
     
-    % fisherCoff: number_of_img 
     VT=V';
-    noOfClass=max(devTrainCell{2});
-    classSpecificMean=zeros(size(devTrainCell{1},1),noOfClass);
-    for c=1:noOfClass                
-        ci=(devTrainCell{2}==c);
-        datapointIndex=find(ci,sum(ci),'first');
-        classSpecificMean(:,c)=mean(devTrainCell{1}(:,datapointIndex),2);
-    end
     mat=devTrainCell{1};    
     %mat=classSpecificMean;
     

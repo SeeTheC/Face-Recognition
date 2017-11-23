@@ -2,19 +2,26 @@ function [Wopt,classSpecificMean] = FisherFaceSampleProjection(trainImgCell,Wpca
 %   Fisher Faces
     % Initialization
     % Assuming the train set is sorted by the class label
-    %imgMatrix=trainImgCell{1};
-    %imgLabel=trainImgCell{2};
+    imgMatrix=trainImgCell{1};
+    imgLabel=trainImgCell{2};
+    totalTrainSamples=size(trainImgCell{1},2);
     
-    imgMatrix=yaleTrainImgCell{1};
-    imgLabel=yaleTrainImgCell{2};
-    
-    
-    [vectorSize,noOfImages]=size(imgMatrix);
+    [vectorSize,noOfImages]=size(imgMatrix);    
     % Finding Different Classes 
     classes= unique(imgLabel);
     noOfClass=numel(classes);
+    
+    %----------------------------------------------------
+    
+    % Taking only N-C Vectors of Wpca Projection
+    %Wpca=Wpca(:,1:totalTrainSamples-noOfClass);
+    %Projecting Train Samples
+    %projectedTrainedImg=Wpca'*imgMatrix;    
+    %vectorSize=totalTrainSamples-noOfClass;
+    projectedTrainedImg=imgMatrix;
+    
     % Finding global mu (mean
-    globalmean=mean(imgMatrix,2);
+    globalmean=mean(projectedTrainedImg,2);
         
     % Finding per class mean
     classSpecificMean=zeros(vectorSize,noOfClass);
@@ -23,7 +30,7 @@ function [Wopt,classSpecificMean] = FisherFaceSampleProjection(trainImgCell,Wpca
         ci=(imgLabel==c);
         datapointPerClass(c)=sum(ci);        
         datapointIndex=find(ci,datapointPerClass(c),'first');
-        classSpecificMean(:,c)=mean(imgMatrix(:,datapointIndex),2);
+        classSpecificMean(:,c)=mean(projectedTrainedImg(:,datapointIndex),2);
     end
       
     
@@ -31,7 +38,7 @@ function [Wopt,classSpecificMean] = FisherFaceSampleProjection(trainImgCell,Wpca
     % Sw = sigma{i=1:c} sigma{j=1:ni} (xk-mu_i)*(xk-mu_i)T
     meanDedicatedXi=zeros(vectorSize,noOfImages);    
     for i=1:noOfImages         
-        meanDedicatedXi(:,i)=imgMatrix(:,i)-classSpecificMean(:,imgLabel(i));
+        meanDedicatedXi(:,i)=projectedTrainedImg(:,i)-classSpecificMean(:,imgLabel(i));
         %%Sw= Sw + (diff*diff'));
     end
     Sw=meanDedicatedXi*meanDedicatedXi';
@@ -43,18 +50,15 @@ function [Wopt,classSpecificMean] = FisherFaceSampleProjection(trainImgCell,Wpca
         ni=datapointPerClass(c);
         diff=classSpecificMean(:,c)-globalmean;
         Sb= Sb + (ni * (diff*diff'));
-    end
+    end      
     
-    WtSbW=Wpca'*Sb*Wpca;
-    WtSwW=Wpca'*Sw*Wpca;
-    
-    %WtSbW=Sb;WtSwW=Sw;
-    [Wfld,D]=eig(WtSbW,WtSwW);
+    [Wfld,D]=eig(Sb,Sw);
     [D,idx] = sort(diag(D),'descend');
     Wfld = Wfld(:,idx);
     
     %Taking Top C-1 Eign Vectors because after all eigen values are zero
     Wfld=Wfld(:,1:noOfClass-1); 
-    Wopt=Wpca*Wfld;
+    %Wopt=Wpca*Wfld;
+    Wopt=Wfld;
 end
 

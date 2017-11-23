@@ -7,6 +7,10 @@ function [trainImgMatrix,testImgMatrix,row,col] = readData(dirpath,dbType,downSa
         dim=[192,168];
         [trainImgMatrix,testImgMatrix,row,col]=readDB(dirpath,dim,38,40,20,downSample);
     end
+    if strcmp(dbType,'extendedyale')
+        dim=[480,640];
+        [trainImgMatrix,testImgMatrix,row,col]=readDB(dirpath,dim,28,100,100,downSample);
+    end
 end
 
 % Reads the images from the Database and returns the trainImage dataset and
@@ -54,9 +58,11 @@ function [trainImgCell,testImgCell,row,col]=readDB(dirpath,dimension,numOfPerson
                     if perPersonCount <= trainSize
                         trainImgMatrix(:,(personCount*trainSize)+perPersonCount) = vector;
                         trainImgLabel((personCount*trainSize)+perPersonCount)=personCount+1;
-                    else
+                    elseif perPersonCount <= trainSize+testSize
                         testImgMatrix(:,(personCount*testSize)+perPersonCount-trainSize) = vector;
                         testImgLabel((personCount*testSize)+perPersonCount-trainSize)=personCount+1;
+                    else 
+                        break;
                     end
                     perPersonCount=perPersonCount+1;
             end
