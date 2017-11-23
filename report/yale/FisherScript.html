@@ -1,0 +1,235 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>FisherScript</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-11-23"><meta name="DC.source" content="FisherScript.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Initialization Face Datase</a></li><li><a href="#2">1. Finding the EignFace : Yale Dateset</a></li><li><a href="#3">2. Fisher LDA</a></li><li><a href="#4">3. Fisher Faces</a></li><li><a href="#5">4. Test Data</a></li><li><a href="#6">5. Classification Plot</a></li></ul></div><h2>Initialization Face Datase<a name="1"></a></h2><p>Read data will return train and  test cell. Each cell contains data and its associated label.</p><pre class="codeinput">tic
+clear
+databaseType=2;
+<span class="keyword">if</span>(databaseType==1)<span class="comment">% attr</span>
+    attDirpath=<span class="string">'../../dataset/att_faces'</span>;
+    [attrTrainImgCell,attrTestImgCell,attImgHeight,attrImgWidth]=readData(attDirpath,<span class="string">'att_faces'</span>,1);
+    trainImgCell=attrTrainImgCell;
+    testImgCell=attrTestImgCell;
+    imgHeight= attImgHeight;imgWidth=attrImgWidth;
+
+<span class="keyword">elseif</span>(databaseType==2)<span class="comment">% yale</span>
+    yaleDirpath=<span class="string">'../../dataset/CroppedYale'</span>;
+    [yaleTrainImgCell,yaleTestImgCell,yaleImgHeight,yaleImgWidth]=readData(yaleDirpath,<span class="string">'yale'</span>,1);
+    trainImgCell=yaleTrainImgCell;
+    testImgCell=yaleTestImgCell;
+    imgHeight= yaleImgHeight;imgWidth=yaleImgWidth;
+
+<span class="keyword">elseif</span>(databaseType==3)<span class="comment">% extended yale</span>
+    extendedYale= <span class="string">'/media/khursheed/4E20CD3920CD2933/wamp/ExtendedYaleB'</span>;
+    [extendedYaleTrainImgCell,extendedYaleTestImgCell,extendedYaleImgHeight,extendedYaleImgWidth]=readData(extendedYale,<span class="string">'extendedyale'</span>,1/5);
+    trainImgCell=extendedYaleTrainImgCell;
+    testImgCell=extendedYaleTestImgCell;
+    imgHeight= extendedYaleImgHeight;imgWidth=extendedYaleImgWidth;
+
+<span class="keyword">end</span>
+
+totalTrainSamples=size(trainImgCell{1},2);noOfClass=max(trainImgCell{2});
+
+toc
+fprintf(<span class="string">'**Reading of images Done.\n'</span>);
+</pre><pre class="codeoutput">Elapsed time is 3.411964 seconds.
+**Reading of images Done.
+</pre><h2>1. Finding the EignFace : Yale Dateset<a name="2"></a></h2><pre class="codeinput">tic
+[globalMean,Wpca,meanDeviatedImg]=eigenFaceUsingSVD(trainImgCell{1});
+toc
+fprintf(<span class="string">'**Finding Wpca.Done.\n'</span>);
+</pre><pre class="codeoutput">Elapsed time is 10.255765 seconds.
+**Finding Wpca.Done.
+</pre><h2>2. Fisher LDA<a name="3"></a></h2><pre class="codeinput">tic
+<span class="comment">%[Wopt,classSpecificMean]=FisherFaceVarProjection(trainImgCell,Wpca);</span>
+<span class="comment">%[Wopt,classSpecificMean]=FisherFaceSampleProjection(trainImgCell,Wpca);</span>
+[Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca);
+
+toc
+fprintf(<span class="string">'**Finding Fisher Faces.Done.\n'</span>);
+</pre><pre class="codeoutput">Elapsed time is 20.035476 seconds.
+**Finding Fisher Faces.Done.
+</pre><h2>3. Fisher Faces<a name="4"></a></h2><pre class="codeinput">tic
+figure(<span class="string">'name'</span>,strcat(<span class="string">'Fisher Face:'</span>,int2str(i)));
+row=imgHeight;col=imgWidth;
+<span class="keyword">for</span> i=1:4
+    subplot(2,2,i);
+    testEigFace=Wopt(:,i);
+    eigFaceImage = reshape(testEigFace,row,col);
+    colormap(gray);
+    imagesc(eigFaceImage);
+    title(strcat(<span class="string">'\fontsize{10}{\color{magenta}Fisher Face: '</span>,int2str(i),<span class="string">'}'</span>));
+    colorbar;
+<span class="keyword">end</span>
+toc;
+</pre><pre class="codeoutput">Elapsed time is 0.257452 seconds.
+</pre><img vspace="5" hspace="5" src="FisherScript_01.png" alt=""> <h2>4. Test Data<a name="5"></a></h2><pre class="codeinput">recognitionRate=imageRecognitionFisher(normWopt,globalMean,trainImgCell,testImgCell);
+fprintf(<span class="string">'Recognising Test data.Done.\n'</span>);
+</pre><pre class="codeoutput">**Recognition-Rate:0.739474 
+Recognising Test data.Done.
+</pre><h2>5. Classification Plot<a name="6"></a></h2><pre class="codeinput">W=Wopt;
+WSq=W.^2;
+WDis=sum(WSq).^0.5;
+WNorm= bsxfun(@times, W, 1./WDis);
+
+projection = W'*testImgCell{1};
+
+<span class="comment">% Top three coordinate plot</span>
+x=projection(1,:);x=reshape(x,numel(x),1);
+y=projection(2,:);y=reshape(y,numel(y),1);
+z=projection(3,:);z=reshape(y,numel(z),1);
+s =testImgCell{2};
+c = testImgCell{2};
+figure
+scatter3(x,y,z,s,c)
+view(45,35);
+</pre><img vspace="5" hspace="5" src="FisherScript_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Initialization Face Datase
+% Read data will return train and  test cell. Each cell contains data and
+% its associated label.
+tic
+clear
+databaseType=2;
+if(databaseType==1)% attr
+    attDirpath='../../dataset/att_faces';
+    [attrTrainImgCell,attrTestImgCell,attImgHeight,attrImgWidth]=readData(attDirpath,'att_faces',1);
+    trainImgCell=attrTrainImgCell;
+    testImgCell=attrTestImgCell;
+    imgHeight= attImgHeight;imgWidth=attrImgWidth;
+
+elseif(databaseType==2)% yale
+    yaleDirpath='../../dataset/CroppedYale';
+    [yaleTrainImgCell,yaleTestImgCell,yaleImgHeight,yaleImgWidth]=readData(yaleDirpath,'yale',1);
+    trainImgCell=yaleTrainImgCell;
+    testImgCell=yaleTestImgCell;
+    imgHeight= yaleImgHeight;imgWidth=yaleImgWidth;
+
+elseif(databaseType==3)% extended yale
+    extendedYale= '/media/khursheed/4E20CD3920CD2933/wamp/ExtendedYaleB';
+    [extendedYaleTrainImgCell,extendedYaleTestImgCell,extendedYaleImgHeight,extendedYaleImgWidth]=readData(extendedYale,'extendedyale',1/5);
+    trainImgCell=extendedYaleTrainImgCell;
+    testImgCell=extendedYaleTestImgCell;
+    imgHeight= extendedYaleImgHeight;imgWidth=extendedYaleImgWidth;
+
+end    
+
+totalTrainSamples=size(trainImgCell{1},2);noOfClass=max(trainImgCell{2});
+
+toc
+fprintf('**Reading of images Done.\n');
+%%
+%% 1. Finding the EignFace : Yale Dateset
+tic
+[globalMean,Wpca,meanDeviatedImg]=eigenFaceUsingSVD(trainImgCell{1});
+toc
+fprintf('**Finding Wpca.Done.\n');
+%% 2. Fisher LDA
+tic
+%[Wopt,classSpecificMean]=FisherFaceVarProjection(trainImgCell,Wpca);
+%[Wopt,classSpecificMean]=FisherFaceSampleProjection(trainImgCell,Wpca);
+[Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca);
+
+toc
+fprintf('**Finding Fisher Faces.Done.\n');
+%% 3. Fisher Faces
+tic
+figure('name',strcat('Fisher Face:',int2str(i)));    
+row=imgHeight;col=imgWidth;
+for i=1:4
+    subplot(2,2,i);    
+    testEigFace=Wopt(:,i);
+    eigFaceImage = reshape(testEigFace,row,col);    
+    colormap(gray);
+    imagesc(eigFaceImage);
+    title(strcat('\fontsize{10}{\color{magenta}Fisher Face: ',int2str(i),'}'));
+    colorbar;
+end
+toc;
+%% 4. Test Data 
+recognitionRate=imageRecognitionFisher(normWopt,globalMean,trainImgCell,testImgCell);
+fprintf('Recognising Test data.Done.\n');
+
+%% 5. Classification Plot
+W=Wopt;
+WSq=W.^2;
+WDis=sum(WSq).^0.5;
+WNorm= bsxfun(@times, W, 1./WDis); 
+
+projection = W'*testImgCell{1};
+
+% Top three coordinate plot
+x=projection(1,:);x=reshape(x,numel(x),1);
+y=projection(2,:);y=reshape(y,numel(y),1);
+z=projection(3,:);z=reshape(y,numel(z),1);
+s =testImgCell{2};
+c = testImgCell{2};
+figure
+scatter3(x,y,z,s,c)
+view(45,35);
+##### SOURCE END #####
+--></body></html>
