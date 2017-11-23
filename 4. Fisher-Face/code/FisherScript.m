@@ -41,8 +41,8 @@ fprintf('**Finding Wpca.Done.\n');
 %% 2. Fisher LDA
 tic
 %[Wopt,classSpecificMean]=FisherFaceVarProjection(trainImgCell,Wpca);
-[Wopt,normWopt,classSpecificMean]=FisherFaceSampleProjection(trainImgCell,Wpca);
-%[Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca);
+%[Wopt,normWopt,classSpecificMean]=FisherFaceSampleProjection(trainImgCell,Wpca);
+[Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca);
 
 toc
 fprintf('**Finding Fisher Faces.Done.\n');
