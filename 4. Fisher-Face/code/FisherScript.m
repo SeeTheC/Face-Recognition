@@ -4,7 +4,7 @@
 % its associated label.
 tic
 clear
-databaseType=3;
+databaseType=2;
 if(databaseType==1)% attr
     attDirpath='../../dataset/att_faces';
     [attrTrainImgCell,attrTestImgCell,attImgHeight,attrImgWidth]=readData(attDirpath,'att_faces',1);
@@ -42,6 +42,7 @@ fprintf('**Finding Wpca.Done.\n');
 tic
 %[Wopt,classSpecificMean]=FisherFaceVarProjection(trainImgCell,Wpca);
 %[Wopt,normWopt,classSpecificMean]=FisherFaceSampleProjection(trainImgCell,Wpca);
+%[Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca(:,4:end));
 [Wopt,normWopt,classSpecificMean]=FisherFaceVarProjMemOpt(trainImgCell,Wpca);
 
 toc
